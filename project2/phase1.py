@@ -1,193 +1,145 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun Apr 16 16:48:04 2017
+Created on Wed Apr 19 17:05:58 2017
 
 @author: gregflood918
+
+Greg Flood
+CS 5970 - Text Analytics
+
+Project 2 - Phase 1
+The goal of this project is to read in a list of paired
+similarities for various types of food and perform 
+clustering to explore similairites/differences between
+the foods
+
 """
 
-
-import nltk
-import csv
-import re
 import numpy as np
 import pandas as pd
-from scipy.cluster.hierarchy import dendrogram, linkage
 from matplotlib import pyplot as plt
-from scipy.cluster.hierarchy import fcluster
-
-
-#make distance matrix from the srep00196-s2.csv file
-#each ingredient will be a row, and each column will be also
-#be ingredients.  The intersection will represent the distance between
-#ingredients as represented by the number of chemical compounds they
-#share.  To get distance, we calculate:
-#  
-#distance(i,j) = 1 / (similarity(i,j)+1)
-#
-#where the similarity of compunds i and j is the number of shared compounds
-#
-#So going row by row, we can calculate
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import scale
+import matplotlib.cm as cm
 
 
 
-#VERY USEFUL, PRETTY CODE FROM https://joernhees.de/blog/2015/08/26/scipy-hierarchical-clustering-and-dendrogram-tutorial/
-def fancy_dendrogram(*args, **kwargs):
-    max_d = kwargs.pop('max_d', None)
-    if max_d and 'color_threshold' not in kwargs:
-        kwargs['color_threshold'] = max_d
-    annotate_above = kwargs.pop('annotate_above', 0)
+#Function to get the paired ingredients file.  Returns
+#a pandas dataframe containing the formatted ingredients
+def getPairedIngredients():
+    paired_ingredients = pd.read_csv("srep00196-s2.csv", header=4, sep=',',
+                                 names=['a', 'b', 'sim'])
+    #Replace underscores with spaces
+    paired_ingredients.replace('_',' ',regex=True,inplace=True)
+    return paired_ingredients
+    
+    
+    
+#Function to comput the difference matrix for the a passed pandas
+#dataframe.  The frame should contain columns names 'a' and 'b', along
+#with a column 'sim' showing the similarity of the two ingredients in
+#terms of shared components
+def computeDistanceMatrix(paired_ingredients):
+    #Extract list of unique ingredients
+    a = list(paired_ingredients['a'])
+    b = list(paired_ingredients['b'])
+    unique_ingredients = list(set(a + b))
+    #Build distance matrix : dist = 1/(1+sim)
+    dist = np.ones((len(unique_ingredients), len(unique_ingredients)))
+    dist = pd.DataFrame(dist, index=unique_ingredients, columns=unique_ingredients)
+    for index, row in paired_ingredients.iterrows():
+        dist[row['a']][row['b']] = (1/(1+int(row['sim'])))
+        dist[row['b']][row['a']] = (1/(1+int(row['sim'])))
+    for i in range(len(dist)):
+        dist.iloc[i][i] = 0
+    return dist
+    
+        
 
-    ddata = dendrogram(*args, **kwargs)
+#Function to reduce the dimensions of the dataset down from >1000 down 
+#to two.  Returns a dataframe of values with columns xs, ys, and clusters.
+#Each row correspondes to the same food in the similarity/distance matrix,
+#and the xs, ys refer to the position of the ingreident along the first and
+#second principal component axis.  Accepts a similarity matrix and a vector
+#of numerical clsuter names.
+def dimensionReduce(sim,clusters):
+    pca = PCA(n_components=2) 
+    pca_space = pca.fit_transform(sim)
+    xs, ys = pca_space[:, 0], pca_space[:, 1]
+    #Scale the pca vectors for better visualization
+    xs = scale(xs)
+    ys = scale(ys)
+    df2 = pd.DataFrame(dict(x=xs, y=ys, label=clusters))
+    groups = df2.groupby('label')   
+    return groups
+    
+ 
+    
+#Function that accepts the returned value from dimensionReduce.  It should
+#be a dataframe of coordinates grouped by cluster number.  This is then
+#plotted in a 2D plane using the principal component coordinates.  The
+#labels are the 3 items from each cluster that are closest to the centroid
+#for each of the 8 clusters.  We can see that the groups make coherent sense.
+def createFigure(groups,labels):    
+    colors = cm.jet(np.linspace(0, 1, len(labels)))  
+    color_map = {}
+    label_map = {}
+    for i in range(len(labels)):
+        color_map[i] = colors[i]
+        label_map[i] = labels[i]   
+    for name,group in groups:
+        plt.scatter(group.x,group.y,color=color_map[name],label=label_map[name])
+    #Formatting
+    plt.legend(numpoints=1,fontsize='x-small', loc=2, borderaxespad=0)
+    plt.title('PCA Representation of K-means')
+    plt.xlabel('Principal Component 1')
+    plt.ylabel('Principal Component 2')
+    plt.ylim((-3,7.5)) #Make room for legend
+    plt.show()
+    return
+    
 
-    if not kwargs.get('no_plot', False):
-        plt.title('Hierarchical Clustering Dendrogram (truncated)')
-        plt.xlabel('sample index or (cluster size)')
-        plt.ylabel('distance')
-        for i, d, c in zip(ddata['icoord'], ddata['dcoord'], ddata['color_list']):
-            x = 0.5 * sum(i[1:3])
-            y = d[1]
-            if y > annotate_above:
-                plt.plot(x, y, 'o', c=c)
-                plt.annotate("%.3g" % y, (x, y), xytext=(0, -5),
-                             textcoords='offset points',
-                             va='top', ha='center')
-        if max_d:
-            plt.axhline(y=max_d, c='k')
-    return ddata
-
-
-
-
-
-
-
-paired_similarity=[]
-unique_ingredients = set()
-with open('srep00196-s2.csv',newline='') as csvfile:
-    filereader = csv.reader(csvfile, delimiter = ',')
-    for i in range(200000): #We can limit the file size here
-        if(i < 4):
-            next(filereader)#skip header in file
-        else:
-            temp = next(filereader)
-            #Replace _ with space characters
-            for j in range(len(temp)):
-                temp[j]=temp[j].replace("_"," ")
-                if j==0 or j==1:
-                    unique_ingredients.add(temp[j]) #To get length of dist matrix
-            paired_similarity.append(temp)
-#Initialize numpy similarity matrix
-similarity = np.ones((len(unique_ingredients),len(unique_ingredients)))
-#Cast unique ingredient set to a list
-unique_ingredients = list(unique_ingredients)
-#Make pandas dataframe
-similarity = pd.DataFrame(similarity,index=unique_ingredients,columns = unique_ingredients)
-#populate similarity DF
-for item in paired_similarity:
-    similarity[item[0]][item[1]] = (1/(1+int(item[2])))
-#arbitrarily set the similarity of an item to itself to 100
-for i in range(len(similarity)):
-    similarity.iloc[i][i] = 0
-
-#generate linkage matrix
-Z = linkage(similarity.values,'complete')
-
-
-fancy_dendrogram(
-    Z,
-    truncate_mode='lastp',
-    p=12,
-    leaf_rotation=90.,
-    leaf_font_size=12.,
-    show_contracted=True,
-    annotate_above=200,
-)
-plt.show()
-
-
-
-max_d = 10
-clusters = fcluster(Z, max_d, criterion='distance')
-clusters
-
-zipped = list(zip(similarity.index.tolist(),clusters.tolist()))
-
-print([x for x,y in zipped if y == 1])
-
-print([x for x,y in zipped if y == 2])
-
-print([x for x,y in zipped if y == 3])
-
-print([x for x,y in zipped if y == 4])
-
-print([x for x,y in zipped if y == 115])
-
-
-
-'''
-df.index.tolist() #index to a list
-similarity.index.tolist()
-
-
-
-#zip is a geneartor, list(zip()) list automatically exhausts an interator
-to get a new list
-[x for x,y in zipped if y == 140] #extract values with list comprehensions
-
-[x for x,y in zipped if y == 1]
-Out[159]: ['rum']
-
-[x for x,y in zipped if y == 2]
-Out[160]: ['rose wine']
-
-[x for x,y in zipped if y == 3]
-Out[161]: ['sherry']
-
-[x for x,y in zipped if y == 4]
-Out[162]: ['tomato']
-
-[x for x,y in zipped if y == 5]
-Out[163]: ['sauvignon grape']
-
-#All of these are quite similar.  Why are they merging so very late?
+#Function that performs k-means clustering and visualizes the clusters.  It
+#requires a distance matrix and an optimal number of clusters.  The default
+#is 8, and all the analysis in the readme assumes 8 clusters.  But you could
+#do otherwise if you so choose.  This includes a call to the dimensionReduce()
+#and createFigure() functions.  Also extracts the labels from the created
+#clusters by selecting the 3 ingredients closest to the centroid of each
+#cluster.  These are the "canonical labels"
+def kMeansCluster(dist,num_clusters=8):
+    sim = 1-dist
+    km = KMeans(n_clusters=num_clusters,random_state = 101)
+    km.fit(sim)
+    #Get Cluster labels for each item
+    clusters = km.labels_.tolist()
+    
+    #Create useful dataframe containing ingredients and their corresponding clusters
+    foods = { 'ingredient': sim.index.tolist(), 'cluster': clusters}
+    frame = pd.DataFrame(foods, columns = ['ingredient','cluster'])
+    order_centroids = km.cluster_centers_.argsort()[:, ::-1] 
+    #Extract labels by taking the five most centrally located
+    #items from each group
+    labels = []
+    for i in range(num_clusters):
+        innerLab=[]
+        for ind in order_centroids[i, :]: #replace 6 with n words per cluster
+            if clusters[ind]==i:
+                innerLab.append(frame.iloc[ind]['ingredient'])
+            if len(innerLab)==3:
+                labels.append(innerLab)
+                break
+    #Labels to strings
+    labels = [','.join(x) for x in labels]
+    reduced = dimensionReduce(sim,clusters) #Reduce dimensions and group
+    createFigure(reduced,labels) #Show figure
+    
 
 
-
-
-
-
-list(zip(similarity.index.tolist(),clusters.tolist()))
-# calculate full dendrogram
-plt.figure(figsize=(25, 10))
-plt.title('Hierarchical Clustering Dendrogram')
-plt.xlabel('sample index')
-plt.ylabel('distance')
-dendrogram(
-    Z,
-    leaf_rotation=90.,  # rotates the x axis labels
-    leaf_font_size=8.,  # font size for the x axis labels
-)
-plt.show()
-'''
-'''
-
-documents = ["Human machine interface for lab abc computer applications",
-             "A survey of user opinion of computer system response time",
-             "The EPS user interface management system",
-             "System and human system engineering testing of EPS",
-             "Relation of user perceived response time to error measurement",
-             "The generation of random binary unordered trees",
-             "The intersection graph of paths in trees",
-             "Graph minors IV Widths of trees and well quasi ordering",
-             "Graph minors A survey"]
-
-vectorizer = TfidfVectorizer(stop_words='english')
-X = vectorizer.fit_transform(documents)
-
-
-X
-Out[96]: 
-<9x33 sparse matrix of type '<class 'numpy.float64'>'
-	with 47 stored elements in Compressed Sparse Row format>
- '''
+#Simple function to be called in the main method.  This executes all of the
+#above methods in the proper order.
+def executePhaseOne():
+    paired = getPairedIngredients()
+    dist = computeDistanceMatrix(paired)
+    kMeansCluster(dist)
