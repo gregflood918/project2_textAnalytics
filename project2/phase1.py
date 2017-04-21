@@ -102,7 +102,7 @@ def createFigure(groups,labels):
     
 
 #Function that performs k-means clustering and visualizes the clusters.  It
-#requires a distance matrix and an optimal number of clusters.  The default
+#requires a distance matrix and an optional number of clusters.  The default
 #is 8, and all the analysis in the readme assumes 8 clusters.  But you could
 #do otherwise if you so choose.  This includes a call to the dimensionReduce()
 #and createFigure() functions.  Also extracts the labels from the created

@@ -9,6 +9,7 @@ Created on Thu Apr 20 13:08:27 2017
 scikit-learn already provides pairwise metrics (a.k.a. kernels in machine learning parlance) that work for both dense and sparse representations of vector collections. In this case we need a dot product that is also known as the linear kernel
 '''
 
+import os
 import json
 import nltk
 import pickle
