@@ -3,7 +3,7 @@ Project 2 - Phase One
 Greg Flood
 gflood@ou.edu
 
-
+#See requirements.txt for the packages required to run this program
 ##############################################################################
 ##############################################################################
 
@@ -29,7 +29,8 @@ K-means clustering through the sklearn Kmeans module was selected for implementa
 The primary reason for this selection was the size of the 'srep00196-s2.csv' dataset.
 Because the dataset is so large, computing hierarchical clustering would become 
 expensive, as it requires the calculating the distance between each point and every
-other observation at each merge step.
+other observation at each merge step. K-means avoids this by only calculating
+the distance to each of the centroids, 
 
 In order to use K-means clustering, the data had to be turned into features.  Since
 'srep00196-s2.csv' essentially provides pairwise similarity scores (since the
@@ -54,7 +55,9 @@ This similarity (or distance) matrix can be used as an input for the
 sklearn Kmeans implementation.  8 clusters are the default option
 for the number of clusters.  This number was selected through trial and error, 
 and ultimately produced the most sensible groups.  The random state of the
-algorithm is initialized to 101, so the result will be the same every simulation.
+algorithm is initialized to 101, so the result should be the same every simulation.
+However, upon testing, it was noted that the labels of clusters changed between
+days, so perhaps there is another element of randomness in the code.
 Furthermore, the function kMeansCluster() accepts an optional argument
 specifying the number of clusters, but this is not accessible via the 
 executePhaseOne() function that runs the simulation in order.
@@ -79,9 +82,17 @@ The labels for each cluster are determined but the 3 ingredients that are closes
 to the centroid for each cluster in terms of Euclidean distance.  This would be
 the 3 points "most" representative of the cluster.  The cluster labels are as follows:
 
+0 - mustard, grapefruit juice, truffle
+1 - ables sibirica, eucalyptus globulius oil, monarda punctata
+2 - bantu beer, beer, black tea
+3 - israeli orange, california orange, orange
+4 - palm, petitgrain lemon, hyacinth oil
+5 - tuberose, acacia, orange flower
+6 - smoked fatty fish, tuna, keta salmon
+7-  nutmeg, ashantl pepper, tobasco pepper.
 
 We can see that these labels make some intuitive sense, as we see beverages,
-sour fruits, meats, and peppers in their own distinct groups.
+sour fruits, fish, and peppers in their own distinct groups.
 
 
 ##############################################################################
@@ -94,8 +105,8 @@ Python 3
 ##############################################################################
 
 Testing:
-Since there is no user-facing interface for phase1, there are no tests modules. Also,
-the project description does not say anything about creating tests.
+Since there is no user-facing interface for phase1, there are no tests modules. 
+Also, the project description does not say anything about creating tests.
 
 
 ##############################################################################
@@ -111,6 +122,11 @@ python3 main.py
 main.py contains a call to the function executePhaseOne(), which executes
 the relevant functions of phase 1 in the proper sequential order.
 
+Note that main.py must execute in the "./project2_textAnalytics" directory.
+Otherwise, it won't be able to find the 'srep00196-s2.csv' file.  Also note
+that the functions of phase1.py are meant to be called from the same directory.
+They also will not work if called form any other directory but 
+"./project2_textanalytics"
 
 project2_textAnalytics/
         project2/
@@ -121,7 +137,7 @@ project2_textAnalytics/
         setup.cfg
         requirements.txt
         main.py
-	docs/
+        data/
 		srep00196-s2.csv
         tests/
 
@@ -175,7 +191,21 @@ above methods in the proper order.
 ##############################################################################
 Bugs:
 
+Again, note that main.py and phase1.py must be exectued from the 
+"./project2_textAnalytics" directory to work.
+
+The random state for kmeans seems to only apply if the main.py
+is run again in the same session.  The labels will change from 
+one session to the next
+
 
 ##############################################################################
 ##############################################################################
 References:
+
+Clustering Reference:
+http://brandonrose.org/clustering
+
+Data taken from:
+Ahn, Y, et.al. "Flavor network and the principles of food pairing." 
+Scientific Reports, 2011.

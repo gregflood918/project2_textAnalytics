@@ -15,27 +15,27 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
 from sklearn.linear_model import SGDClassifier
 from statistics import mode
+
+
 import pickle
 import pandas as pd
-import re
-import time
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.metrics.pairwise import linear_kernel
-from sklearn.feature_extraction.text import CountVectorizer
 
+'''
+import os, sys
+lib_path = os.path.abspath(os.path.join('..','project1'))
+sys.path.append(lib_path)
+'''
 
+'''
 
-
-#Code that is referenced in all the functions below.
-food_json = pd.read_json("data/yummly.json")
+food_json = pd.read_json("yummly.json")
 all_ingredients = set()
+j = []
 for recipe in food_json['ingredients']:
     for food in recipe:
         all_ingredients.add(food.lower())
-all_ingredients = sorted(list(all_ingredients))  
-     
-
+all_ingredients = sorted(list(all_ingredients))    
+'''
 
 
 #Function that accepts a recipe (as an array) and returns a feature
@@ -43,7 +43,7 @@ all_ingredients = sorted(list(all_ingredients))
 #false depending on the presence or absence of the ingredient in the
 #passed recipe.  Length of returned dicitonary will be equivalent to
 #the number of unique ingredients.
-def make_features(doc):
+def make_features(doc,all_ingredients):
     doc = [j.lower() for j in doc] #consistent lower case
     ingredients = set(doc)
     
@@ -62,14 +62,14 @@ def make_features(doc):
 #exists in the current working directory with the specified name, no classifer
 #will be trained. Otherwise, a new .pickle file will be saved contain the
 #classifier.  Note that the FULL data set is being used after training
-def train_bayes():
+def train_bayes(food_json, all_ingredients):
     if os.path.isfile("naive_bayes.pickle"):
         print("Model has already been trained")
         return
     #Create featureset and perform basic train/test    
     featureSet = []
     for index,row in food_json.iterrows():
-        featureSet.append((make_features(row['ingredients']),row['cuisine']))
+        featureSet.append((make_features(row['ingredients'], all_ingredients),row['cuisine']))
     trainSet = featureSet[:2000]
     testSet = featureSet[2000:2400]
     classifier = nltk.NaiveBayesClassifier.train(trainSet)
@@ -90,14 +90,14 @@ def train_bayes():
 #exists in the current working directory with the specified name, no classifer
 #will be trained. Otherwise, a new .pickle file will be saved contain the
 #classifier.  Note that the FULL data set is being used after training   
-def train_logit():
+def train_logit(food_json, all_ingredients):
     if os.path.isfile("logit.pickle"):
         print("Model has already been trained")
         return
     #Create featureset and perform basic train/test  
     featureSet = []
     for index,row in food_json.iterrows():
-        featureSet.append((make_features(row['ingredients']),row['cuisine']))
+        featureSet.append((make_features(row['ingredients'], all_ingredients),row['cuisine']))
     #Create featureset and perform basic train/test    
     trainSet = featureSet[:2000]
     testSet = featureSet[2000:2400]
@@ -120,14 +120,14 @@ def train_logit():
 #exists in the current working directory with the specified name, no classifer
 #will be trained. Otherwise, a new .pickle file will be saved contain the
 #classifier.  Note that the FULL data set is being used after training   
-def train_multNB():
+def train_multNB(food_json, all_ingredients):
     if os.path.isfile("mult_nb.pickle"):
         print("Model has already been trained")
         return
     #Create featureset and perform basic train/test  
     featureSet = []
     for index,row in food_json.iterrows():
-        featureSet.append((make_features(row['ingredients']),row['cuisine']))
+        featureSet.append((make_features(row['ingredients'], all_ingredients),row['cuisine']))
     #Create featureset and perform basic train/test    
     trainSet = featureSet[:2000]
     testSet = featureSet[2000:2400]
@@ -152,14 +152,14 @@ def train_multNB():
 #exists in the current working directory with the specified name, no classifer
 #will be trained. Otherwise, a new .pickle file will be saved contain the
 #classifier.  Note that the FULL data set is being used after training
-def train_sgd():
+def train_sgd(food_json, all_ingredients):
     if os.path.isfile("sgd.pickle"):
         print("Model has already been trained")
         return
     #Create featureset and perform basic train/test  
     featureSet = []
     for index,row in food_json.iterrows():
-        featureSet.append((make_features(row['ingredients']),row['cuisine']))
+        featureSet.append((make_features(row['ingredients'], all_ingredients),row['cuisine']))
     #Create featureset and perform basic train/test    
     trainSet = featureSet[:2000]
     testSet = featureSet[2000:2400]
@@ -182,14 +182,14 @@ def train_sgd():
 #exists in the current working directory with the specified name, no classifer
 #will be trained. Otherwise, a new .pickle file will be saved contain the
 #classifier.  Note that the FULL data set is being used after training    
-def train_linearSVC():
+def train_linearSVC(food_json, all_ingredients):
     if os.path.isfile("linear_SVC.pickle"):
         print("Model has already been trained")
         return
     #Create featureset and perform basic train/test  
     featureSet = []
     for index,row in food_json.iterrows():
-        featureSet.append((make_features(row['ingredients']),row['cuisine']))
+        featureSet.append((make_features(row['ingredients'], all_ingredients),row['cuisine']))
     #Create featureset and perform basic train/test    
     trainSet = featureSet[:2000]
     testSet = featureSet[2000:2400]
@@ -231,7 +231,8 @@ class Ensemble_Classifier(ClassifierI):
 
 
            
-def initialize_classifier():    
+def initialize_classifier():
+    
     pickles = ['pickles/linear_SVC.pickle',
                'pickles/logit.pickle',
                'pickles/mult_nb.pickle',
@@ -240,7 +241,7 @@ def initialize_classifier():
     classifier_set = []
     for p in pickles:
         if os.path.isfile(p):
-            classifier_imp=open(p,"rb")
+            classifier_imp=open(pickles,"rb")
             classifier_p = pickle.load(classifier_imp)
             classifier_imp.close()
             classifier_set.append(classifier_p)
@@ -252,66 +253,16 @@ def initialize_classifier():
                                               classifier_set[2],classifier_set[3],classifier_set[4])
     return ensemble_classifier
     
-   
     
     
-#Compute the cosine similarity of the user-specified ingredients with
-#all the recipes in the database.  The cosine similarity is computed based
-#on the tf-idf vector,which is computed using the sklearn TfidfVectorizer 
-#module.  Tfidf is chosen over a simple word count because Tfidf will
-#prioritize recipes that have a similar number of ingredients as the supplied
-#recipe.  If the user gives 4 ingredients for a recipe, the count vectorizer
-#wouldn't discrimate between two recipes that match all 4 ingredients, but
-#one recipe has 20 more ingredients that the other.  Tfidf, on the other hand,
-#would select the recipe with fewer ingredients as more similar.  Through tfidf,
-#we get a better sense of proportion
-def compute_similarity(ingreds):
-    #Make each ingredient list a single string
-    foods = ['|'.join(x) for x in food_json['ingredients']] 
-    #test example input from user:
-    _recipe = '|'.join(ingreds)
-    vect = TfidfVectorizer(tokenizer=lambda x: x.split('|'), 
-                           vocabulary=all_ingredients)
-    vect.fit(foods)
-    X = vect.transform(foods)
-    Y = vect.transform([_recipe])    
-    cosine_similarities = linear_kernel(Y,X).flatten()
-    
-    related_docs_indices = cosine_similarities.argsort()[:-6:-1]
-    return related_docs_indices
-
-
-
-def run_option_three(user_recipe):
-    #Build and predict classifer
+def make_prediction(food_json, all_ingredients):
     prediction_classifier = initialize_classifier()
-    test_recipe = make_features(user_recipe)
-    
     print("Predicted type of cuisine for provided ingredients: " +
-          str(prediction_classifier.classify(test_recipe)))
-    print("With " + str(prediction_classifier.vote_percentage(test_recipe)) +
-          "% confidence\n")
-    
-        #Compute similarity scores with cosiine similarity
-    print("The five most similar dishes are the following: ")
-    related = compute_similarity(user_recipe)
-    for i in related:
-        print("Index: "+str(i))
-    flag = False
-    time.sleep(.1) #Added pause because printing was getting jumbled
-    use_input = input("Would you like to see the ingredients for each of these dishes? (y/n): ")
-    print() #formatting
-    while not flag:
-        if use_input.lower() == 'y':
-            flag = True
-            for j in range(len(related)):
-                print("Dish " +str(j+1) + ": " + str(food_json.iloc[related[j]]['ingredients']) 
-                + "\n")
-        elif use_input.lower() == 'n':
-            flag = True
-        else:
-            use_input = input("Invalid entry.  Please enter 'y' or 'n': ")
+          str(prediction_classifier.classify(make_features(['herring','butter','chive','rice'], all_ingredients))))
+    print("With " + str(prediction_classifier.vote_percentage(make_features(['herring','butter','chive','rice'],
+                                                                            all_ingredients))) + "% confidence")
     return 
+
 
 
 #featureSet = []

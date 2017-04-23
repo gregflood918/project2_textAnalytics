@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Created on Sat Apr 22 20:42:43 2017
+
+@author: gregflood918
+"""
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
 Created on Thu Apr 20 13:08:27 2017
 
 @author: gregflood918
@@ -40,21 +48,16 @@ all_ingredients = sorted(list(all_ingredients))
 #Make each ingredient list a single string
 foods = ['|'.join(x) for x in food_json['ingredients']]
 
-_recipe = '|'.join(['bell pepper','butter','chive','rice'])
+
 #test example input from user:
-#Test documents MUST BE FED IN AS LISTS!!!!!!!!!!!!!!!!!!!!!
+test_food = [foods[795]] #Test documents MUST BE FED IN AS LISTS!!!!!!!!!!!!!!!!!!!!!
 vect = CountVectorizer(tokenizer=lambda x: x.split('|'), 
                        vocabulary=all_ingredients)
-#vect.fit(foods)
+vect.fit(foods)
 X = vect.transform(foods)
-Y = vect.transform([_recipe])
+Y = vect.transform([foods[795]])
 
 cosine_similarities = linear_kernel(Y,X).flatten()
 
 related_docs_indices = cosine_similarities.argsort()[:-5:-1]
 food_json.iloc[0]['ingredients']
-
-
-
-                 
-                 

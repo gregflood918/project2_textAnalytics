@@ -26,10 +26,12 @@ import matplotlib.cm as cm
 
 
 
+
 #Function to get the paired ingredients file.  Returns
 #a pandas dataframe containing the formatted ingredients
 def getPairedIngredients():
-    paired_ingredients = pd.read_csv("srep00196-s2.csv", header=4, sep=',',
+    paired_ingredients = pd.read_csv("data/srep00196-s2.csv", 
+                                     header=4, sep=',',
                                  names=['a', 'b', 'sim'])
     #Replace underscores with spaces
     paired_ingredients.replace('_',' ',regex=True,inplace=True)
@@ -96,7 +98,7 @@ def createFigure(groups,labels):
     plt.title('PCA Representation of K-means')
     plt.xlabel('Principal Component 1')
     plt.ylabel('Principal Component 2')
-    plt.ylim((-3,7.5)) #Make room for legend
+    plt.ylim((-4,7.5)) #Make room for legend
     plt.show()
     return
     
