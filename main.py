@@ -50,22 +50,36 @@ def searchMenu():
         
         #User options
         if choice == "1":
-            s = (color.BOLD + "\nDescription: " + color.END + "\nThis program will search "
-                 "for a Latin or English word in the "
-                 "following Latin collections:\n\n" + 
-                 "\nSearches for a user supplied Latin word in all of the "
-                 "aforemention corpuses and returns passages contain the supplied "
-                 "word, along with the Title, Book, Chapter, Verse, and link for "
-                 "the passage.   Additionally, a barplot displaying the frequency of "
-                 "the word usage across all 8 collections will be returned.\n\n" + color.BOLD +
-                 "Option 3: " + color.END + "\nSearches for a user supplied English word in all of the "
-                 "aforemention corpuses and returns passages contain the supplied "
-                 "word, along with the Title, Book, Chapter, Verse, and link for "
-                 "the passage.  The English term is translated to Latin via the "
-                 "mymemory.translated.net translation API, and the translation "
-                 "will be given alongside the prevoius results. Additionally, a "
-                 "barplot displaying the frequency of the word usage across all "
-                 "8 collections will be returned.\n\n" + color.BOLD + 
+            s = (color.BOLD + "\nDescription: " + color.END + "\nThis program will " 
+                 "assist chefs in understanding food pairings and developing "
+                 "creative menu otions.  The user is given the following choices:\n\n" + 
+                 color.BOLD + color.RED +
+                 "Option 1: " + color.END + "\nHelp menu \n\n" +
+                 color.BOLD + color.RED +
+                 "Option 2: " + color.END +
+                 "\nPerforms kmeans clustering on the paired dataset from 'Flavor "
+                 "Newtorks and the Principles of Food Pairing' which provides a list"
+                 " of ingredient pairs along with the number of chemical compounds "
+                 "shared in their molecular structure.  Clustering is performed by "
+                 "creating an NxN (N= # of ingredients in data set) distance matrix "
+                 "where element i,j is 1/(1+sim(i,j)) and sim(i,j) is the number of"
+                 " ingredients shared by ingredients i and j.  However, the clustering "
+                 "algorithm also accounts for indirect similarities, such as how many "
+                 "compounds i an j share with ingredient k.  The visual display shows "
+                 "the clusters mapped to distinct colors and displayed along the first "
+                 "and second Principle Components, calculated using the PCA pacakge in "
+                 "sci-kit learn. \n\n" + color.BOLD + color.RED +
+                 "Option 3: " + color.END + "\nThe user will be prompted to enter "
+                 "ingredient sequentially into the command line, entering '0' when complete. "
+                 "The program will compare the entered ingredients to the yummly.json "
+                 "dataset from 'Inferring Cuisine - Drug Interactions Using the Linked "
+                 "Data Approach.'  The program will predict the most likely cuisine "
+                 "style using 5 an ensemble classifier approach.  Additionallly, "
+                 "the indices of the 5 most similar meals will be returned to the "
+                 "user with the option to display the ingredients.  These simlarities "
+                 "are computed via a 'Term Frequency - Inverse Document Frequency (tf-idf)' "
+                 "approach.  For more technical details, please consult the README"
+                 ".\n\n" + color.BOLD + color.RED +
                  "Option 4: \n" + color.END + "Exits the program\n\n")  
             print(s)
         elif choice == "2":

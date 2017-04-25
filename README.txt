@@ -1,11 +1,330 @@
 
-Project 2 - Phase One
+Project 2 - Phase Two
 Greg Flood
 gflood@ou.edu
 
 #See requirements.txt for the packages required to run this program
+#README FOR PHASE ONE IS APPENDED TO THE BOTTOM OF THIS FILE!
+
+Run 'python3 main.py' from the project2_textAnalytics directory to
+run the program.
+
 ##############################################################################
 ##############################################################################
+
+Assignment:
+Phase Two- The primary goal of phase two of project 2 is to create an
+interface that accepts a list of food ingredients inputted by the
+user then performs two tasks:
+
+1. Predicts the type (style) of cuisine based on the ingredients
+2. Returns the indices of the 'most similar' recpipes to the provided
+ingredient list.
+
+Both of these tasks will be discussed indivudally in the next section.
+
+The 'yummly.json' dataset is used in this project, which gives a 
+number of recipes, each with a unique ID, a cuisine style, and
+a list of ingreidents in a json format.  In total, there are 
+39774 distinct recipes with 6703 unique ingredients in the datset.
+
+Since the user interface includes an option for visualizing the 
+ingredients as clusters using the phase 1 methodology, the 
+Project 2 phase 1 readme is appended to the bottom of this file.
+
+
+
+##############################################################################
+
+Discussion
+
+Part One: Cuisine Prediction
+
+In order to predict the style of dish given a list of ingredients,
+the program reads in the full 'yummly.json' dataset and creates features
+through a 'bag of words' approach, except that multi-word ingredients are
+treated as single features (ex: green pepper and pepper are distinct features).
+This isn't a problem because the 'yummly.json' file is highly structured and
+each ingredient in a recipe is an individual element in the ingredient list.
+
+A set of 6703 unique ingredients was created from 'yummly.json.'  The approach
+to prediction was to create an ensemble of classifiers using different 
+methodologies.  Using ensembles of models is a well-known approach to reduce
+the bias of individual models by assigning classifications based on a majority
+vote of several models.  For this program, the following 5 models were used:
+
+Linear Support-Vector Classifier: 0.6375
+Logistic Regression: 0.655
+Multinomial Naive Bayes: 0.5575
+Stochastic Gradient Descent: 0.62
+Naive Bayes: 0.5825
+
+The first 4 models used the scikit-learn implementation, whereas the last
+model was from NLTK.  These particular models are known to perform well within 
+the text classiifcation domain. Each of them were pretrained using the full
+dataset, although the predictive performance of each model was noted using
+only the first 2000 (of 39774) distinct recipes to predict the style of 
+recipes 2001-2400.  The performance is listed above, next to the model.
+The pretrained models are stored in the .pickle files and are accessed and
+utilized for prediction upon the user entering a list of ingredients. Trianing
+these models with the full data set took several hours, thus storing the
+models as .pickle files save substantial time.
+
+When the user provides a list of ingredients, the list is transformed to 
+a feature vector, consisting of 6703 dimensions.  Each dimension corresponds
+to an ingredient, with the binary value determined by the presence or absence
+of the ingredient in the provided recipe.  This feature vector is then used
+within the 'EnsembleClassifier' instance method 'classify(features).'  The
+EnsembleClassifier class is initialized with a list of classifiers and 
+calls the classify function for each classifier to predict the cuisine of 
+the provided feature vector.  Then, taking the majority vote, the EnsembleClassifier
+returns the predicted class for the given feature vector.  Additionally,
+the EnsembleClassifier has a method called 'vote_percentage' that returns
+then percentage of the 5 models that voted for the modal classification.
+
+
+2. Most Similar Recipes
+
+Additionally, the most similar recipes are computed for the provided list
+of ingredients.  This is performed by transforming the dataset and provided list
+into a  term frequency - inverse document frequency (tfidf) matrix/vector using 
+the Scikit-learn TfIdfVectorizer module, and then computing the cosine similarity
+between each recipe in the dataset and the provided recipe.  The 5 closest 
+matches are returned to the user.
+
+The TfIdfVectorizor.fit function transforms the yummly.json ingredient list
+into 6703 dimension matrix with each row corresponding to an individual 
+recipe.  Unlike the CountVectorizer module, which fills in the columns of
+each row based on the number of occurrence of a word in a provided string of
+text (giving higher weight to more frequently occurring words), the inverse-document
+frequency portion (denominator) of tfidf normalizes based on how frequently the
+word is used across all the documents.  In this problem context, the end result
+is that it will cause recipes sharing uncommon ingredients to be treated
+as more similar.  Additionally, this caused recipes that are similar in
+the number of ingredients to be a closer match versus using the CountVectorizer
+method.  The similarity is computed with cosine similarity, which is widely
+used in text classification as it is better with sparse vectors, which is
+exactly what we have in this particular problem.
+
+
+
+
+##############################################################################
+##############################################################################
+
+Language:
+Python 3
+
+##############################################################################
+##############################################################################
+
+Testing:
+
+
+##############################################################################
+##############################################################################
+
+Instructions:
+
+To run the program, simply navigate to the project2_textAnalytics folder and
+execute the following command:
+
+python3 main.py
+
+main.py contains a call to the searchMenu() function, which provides a command
+line interface for the user.  
+
+Note that main.py must execute in the "./project2_textAnalytics" directory.
+Otherwise, it won't be able to find the approriate data files  Also note
+that the functions of phase1.py and phase2.py are meant to be called from the 
+project2_textAnalytics directory. They also will not work if called form any 
+other directory but  "./project2_textAnalytics"
+
+
+The file structure of project2_textAnalytics is below:
+
+project2_textAnalytics/
+        project2/
+                phase1.py
+                phase2.py
+                __init__.py
+        pickles
+                linear_SVC.pickle
+                logit.pickle
+                mult_nb.pickle
+                naive_bayes.pickle
+                sgd.pickle
+        README
+        setup.py
+        setup.cfg
+        requirements.txt
+        main.py
+        data/
+           yummly.json
+		srep00196-s2.csv
+        tests/
+
+
+##############################################################################
+##############################################################################
+Functions and Classes:
+Each of the functions from phase2.py will be discussed briefly below.  Also,
+the functions from main.py will be discussed.  For descriptions of the
+functions from phase1.py, please see the appended phase 1 readme appended
+to the bottom of this file.
+
+
+
+def make_features(doc):
+Function that accepts a recipe (as an array) and returns a feature
+dictionary.  Each word represents a key and the value will be true or
+false depending on the presence or absence of the ingredient in the
+passed recipe.  Length of returned dicitonary will be equivalent to
+the number of unique ingredients in the yummly dataset.
+
+
+
+class Ensemble_Classifier(ClassifierI):
+    def __init__(self, *classifiers):
+            self._classifiers = classifiers     
+    def classify(self, feature_vector)
+    def vote_percentage(self, feature_vector)
+
+Define an ensemble classifier class that will accept a list of all five 
+previously trained models and make a prediction for the class of the user
+input ingredients based on a majority vote of the five models.  The models
+will be imported form .pickle files in order to save time.  Additionally, 
+the vote_percentage member method provides an estimated level of confidence
+for the strength of the prediction by returning the percentage of models
+that predicted the modal class. 
+
+
+       
+def initialize_classifier():  
+Function that finds and import the .pickle files and intializes an
+EnsembleClassifer class, which it returns    
+
+
+
+def compute_similarity(ingreds):
+Compute the cosine similarity of the user-specified ingredients (ingreds) with
+all the recipes in the database.  The cosine similarity is computed based
+on the tf-idf vector,which is computed using the sklearn TfidfVectorizer 
+module.  Tfidf is chosen over a simple word count because Tfidf will
+prioritize recipes that have a similar number of ingredients as the supplied
+recipe.  If the user gives 4 ingredients for a recipe, the count vectorizer
+wouldn't discrimate between two recipes that match all 4 ingredients, but
+one recipe has 20 more ingredients that the other.  Tfidf, on the other hand,
+would select the recipe with fewer ingredients as more similar.  Through tfidf,
+we get a better sense of proportion
+
+
+
+def run_option_three(user_recipe):
+Function to maintain the proper order of function calls when option 3
+is selected from teh user menu.  Accepts a list of user specfied ingredients
+and makes a cuisine-type prediction, as well as calculates the 5 most similar
+ingredients.  Also outputs results to the command line with formatting.
+
+
+
+The following functions train the classifiers used in the ensemble 
+clasifier using the yummly.jsonfile and saves the trained classifier as a 
+.pickle file.  If a .pickle file exists in the current working directory 
+with the specified name, no classifer will be trained. Otherwise, a new 
+.pickle file will be saved and contain the classifier.  Note that the FULL 
+data set is being used after training, however, training on the first 
+2000 recipes is used to get a sense of predictive performance.
+
+def train_bayes():
+def train_logit():
+def train_multNB():
+def train_sgd():
+def train_linearSVC():
+
+These models are not used in the command line interface, but are only 
+included to show how the training of the models was performed.
+        
+
+
+From main.py :
+ 
+def searchMenu():
+User interface for the translation command line tool.  The user is allowed to
+select between 3 different options:
+
+1 - Help
+2 - Visualize data through clusters
+3 - Predict cuisine type and calculate similar meals
+0 - Quit
+
+Each option corresponds to a number of function calls.
+Program will run until the user manually enter '0'. If '3' is selected,
+the user will enter ingredients one at a time until they enter '0'.  The
+prediction is returned, along with the indices of the 5 most similar 
+ingredients.  The user is then asked whether they want to see the ingredients
+in these 5 recipes.
+
+If '2' is selected, phase1.py is executed exactly as required by the 
+submission for Project2 phase 1.  For details on these functions, see the
+readme for phase one, which is appended below.
+
+
+
+def main():
+Calls the search menu
+
+
+
+##############################################################################
+##############################################################################        
+References:
+
+Data taken from:
+
+
+Ahn, Y, et.al. "Flavor network and the principles of food pairing." 
+Scientific Reports, 2011.
+
+Jovanovik, M, et. al.  "Inferring Cuisine - Drug Interations Using the Linked 
+Data  Approach." Scientific Reports, 2015.
+
+For ensemble classifiers:
+Sentdex nltk ensemble classifiers :
+https://www.youtube.com/watch?v=vlTQLb_a564&t=304s
+
+Clustering Reference:
+http://brandonrose.org/clustering
+
+
+
+
+
+
+##############################################################################
+##############################################################################
+
+
+##############################################################################
+##############################################################################
+
+
+PROJECT 1 - PHASE 1 README 
+(INCLUDED FOR REFERENCE)
+
+
+##############################################################################
+##############################################################################
+
+
+##############################################################################
+##############################################################################
+
+
+
+
+
+
 
 Assignment:
 Phase One- 

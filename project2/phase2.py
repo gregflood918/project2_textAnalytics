@@ -37,7 +37,16 @@ all_ingredients = sorted(list(all_ingredients))
      
 
 
+class color:
+#Color utility class.  This will provide some basic command line formatting
+#and allow for important terms to be displayed in bol on a linux/unix OS
+   BOLD = '\033[1m'
+   UNDERLINE = '\033[4m'
+   RED = '\033[91m'
+   END = '\033[0m'
 
+               
+               
 #Function that accepts a recipe (as an array) and returns a feature
 #dictionary.  Each word represents a key and the value will be true or
 #false depending on the presence or absence of the ingredient in the
@@ -52,6 +61,8 @@ def make_features(doc):
         features[food] = (food in ingredients) #True if recipe has food
     return features    
 
+    
+    
 #Linear kernel is often good for text:
 #https://www.svm-tutorial.com/2014/10/svm-linear-kernel-good-text-classification/   
 #So classifiers will be predominately 
@@ -229,8 +240,8 @@ class Ensemble_Classifier(ClassifierI):
             return guess.count(mode(guess))/ len(guess) * 100
 
 
-
-           
+#Function that finds and import the .pickle files and intializes an
+#EnsembleClassifer class, which it returns          
 def initialize_classifier():    
     pickles = ['pickles/linear_SVC.pickle',
                'pickles/logit.pickle',
@@ -282,15 +293,21 @@ def compute_similarity(ingreds):
 
 
 
+#Function to maintain the proper order of function calls when option 3
+#is selected from teh user menu.  Accepts a list of user specfied ingredients
+#and makes a cuisine-type prediction, as well as calculates the 5 most similar
+#ingredients.  Also outputs results to the command line with formatting.
 def run_option_three(user_recipe):
     #Build and predict classifer
     prediction_classifier = initialize_classifier()
     test_recipe = make_features(user_recipe)
     
-    print("Predicted type of cuisine for provided ingredients: " +
-          str(prediction_classifier.classify(test_recipe)))
-    print("With " + str(prediction_classifier.vote_percentage(test_recipe)) +
-          "% confidence\n")
+    one = ("Predicted type of cuisine for provided ingredients: "+color.BOLD + color.RED +
+          str(prediction_classifier.classify(test_recipe)) + color.END)
+    print(one)      
+    two = ("With " + color.BOLD + color.RED +str(prediction_classifier.vote_percentage(test_recipe)) +
+          "% majority vote (5 models)\n" + color.END)
+    print(two)
     
         #Compute similarity scores with cosiine similarity
     print("The five most similar dishes are the following: ")
@@ -313,22 +330,3 @@ def run_option_three(user_recipe):
             use_input = input("Invalid entry.  Please enter 'y' or 'n': ")
     return 
 
-
-#featureSet = []
-#for index,row in food_json.iterrows():
-#    featureSet.append((make_features(row['ingredients']),row['cuisine']))
-        
-#trainSet = featureSet[:4000]
-#testSet = featureSet[4000:]
-#classifier = nltk.NaiveBayesClassifier.train(trainSet)
-#print(nltk.classify.accuracy(classifier,testSet))
-
-#classifier_f=open("naive_bayes.pickle","rb")
-
-#classifier = pickle.load(classifier_f)
-
-#classifier.classify(make_features(['herring','butter','chive','rice']))
-
-
-
-#clssifier_f.close()
