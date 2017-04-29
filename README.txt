@@ -120,6 +120,49 @@ Python 3
 
 Testing:
 
+In total, there are 7 tests.  They test that the the .pickle files
+for the classifier are present and also test that the essential 
+functions of phase2.py can be performed.  Specifically, it tests the 
+predicted cuisine type for a known recipe and also tests that a known
+recipe is computed as being most similar to itself (relative to the
+yummly.json data.)
+
+The tests are listed below.  To run, go the project2_textAnalytics
+directory and enter the follwoing command:
+
+python3 setup.py test
+
+This uses the pytest module to run the tests.
+
+
+def test_nb():
+Test for naive bayes
+
+def test_multnb():
+Test for multinomial naive-bayes
+
+def test_sgd():
+Test for stochastic gradient descent
+
+def test_logit():
+Test for logistic regression
+
+def test_linSVC():
+Test for linear svc
+    
+def test_ensemble():
+Test that we can make an accurate prediction with the 
+ensemble classifier.  This test initializes a classifier
+then predicts the classifcation of a known recipe.  The
+recipe is taken from yummmly.json and is of the 'greek'
+category.  Test checks that prediction matches category.
+
+def test_similarity():
+Test that the similarity computation works.  The list of
+ingredients passed is equal to the ingredients at index 0
+in yummly.json.  The similarity computation should thus 
+match index 0 as the most similar recipe    
+
 
 ##############################################################################
 ##############################################################################
@@ -163,6 +206,7 @@ project2_textAnalytics/
            yummly.json
 		srep00196-s2.csv
         tests/
+           phase2_test.py
 
 
 ##############################################################################

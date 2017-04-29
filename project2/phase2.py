@@ -74,7 +74,7 @@ def make_features(doc):
 #will be trained. Otherwise, a new .pickle file will be saved contain the
 #classifier.  Note that the FULL data set is being used after training
 def train_bayes():
-    if os.path.isfile("naive_bayes.pickle"):
+    if os.path.isfile("pickles/naive_bayes.pickle"):
         print("Model has already been trained")
         return
     #Create featureset and perform basic train/test    
@@ -89,7 +89,7 @@ def train_bayes():
     #Accuracy .5825
     print("Training full dataset . . .")
     classifier = nltk.NaiveBayesClassifier.train(featureSet)
-    save_classifier = open("naive_bayes.pickle","wb")
+    save_classifier = open("pickles/naive_bayes.pickle","wb")
     pickle.dump(classifier,save_classifier)
     save_classifier.close()
     return
@@ -102,7 +102,7 @@ def train_bayes():
 #will be trained. Otherwise, a new .pickle file will be saved contain the
 #classifier.  Note that the FULL data set is being used after training   
 def train_logit():
-    if os.path.isfile("logit.pickle"):
+    if os.path.isfile("pickles/logit.pickle"):
         print("Model has already been trained")
         return
     #Create featureset and perform basic train/test  
@@ -119,7 +119,7 @@ def train_logit():
     #.655 Accuracy
     print("Training full dataset . . .")
     classifier = Logreg_classifier.train(featureSet)
-    save_classifier = open("logit.pickle","wb")
+    save_classifier = open("pickles/logit.pickle","wb")
     pickle.dump(classifier,save_classifier)
     save_classifier.close()
     return 
@@ -132,7 +132,7 @@ def train_logit():
 #will be trained. Otherwise, a new .pickle file will be saved contain the
 #classifier.  Note that the FULL data set is being used after training   
 def train_multNB():
-    if os.path.isfile("mult_nb.pickle"):
+    if os.path.isfile("pickles/mult_nb.pickle"):
         print("Model has already been trained")
         return
     #Create featureset and perform basic train/test  
@@ -149,7 +149,7 @@ def train_multNB():
     #Accuracy was .5575
     print("Training full dataset . . .")
     classifier = MultinomialNB_classifier.train(featureSet)
-    save_classifier = open("mult_nb.pickle","wb")
+    save_classifier = open("pickles/mult_nb.pickle","wb")
     pickle.dump(classifier,save_classifier)
     save_classifier.close()
     return 
@@ -164,7 +164,7 @@ def train_multNB():
 #will be trained. Otherwise, a new .pickle file will be saved contain the
 #classifier.  Note that the FULL data set is being used after training
 def train_sgd():
-    if os.path.isfile("sgd.pickle"):
+    if os.path.isfile("pickles/sgd.pickle"):
         print("Model has already been trained")
         return
     #Create featureset and perform basic train/test  
@@ -181,7 +181,7 @@ def train_sgd():
     #Accuracy was .62
     print("Training full dataset . . .")
     classifier = SGD_classifier.train(featureSet)
-    save_classifier = open("sgd.pickle","wb")
+    save_classifier = open("pickles/sgd.pickle","wb")
     pickle.dump(classifier,save_classifier)
     save_classifier.close()
     return 
@@ -194,7 +194,7 @@ def train_sgd():
 #will be trained. Otherwise, a new .pickle file will be saved contain the
 #classifier.  Note that the FULL data set is being used after training    
 def train_linearSVC():
-    if os.path.isfile("linear_SVC.pickle"):
+    if os.path.isfile("pickles/linear_SVC.pickle"):
         print("Model has already been trained")
         return
     #Create featureset and perform basic train/test  
@@ -211,7 +211,7 @@ def train_linearSVC():
     #Accuracy was .6375
     print("Training full dataset . . .")
     classifier = LinearSVC_classifier.train(featureSet)
-    save_classifier = open("linear_SVC.pickle","wb")
+    save_classifier = open("pickles/linear_SVC.pickle","wb")
     pickle.dump(classifier,save_classifier)
     save_classifier.close()
     return 
