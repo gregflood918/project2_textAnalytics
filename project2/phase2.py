@@ -313,7 +313,7 @@ def run_option_three(user_recipe):
     print("The five most similar dishes are the following: ")
     related = compute_similarity(user_recipe)
     for i in related:
-        print("Index: "+str(i))
+        print("ID: "+str(food_json.iloc[i]['id']))
     flag = False
     time.sleep(.1) #Added pause because printing was getting jumbled
     use_input = input("Would you like to see the ingredients for each of these dishes? (y/n): ")

@@ -75,7 +75,7 @@ def searchMenu():
                  "dataset from 'Inferring Cuisine - Drug Interactions Using the Linked "
                  "Data Approach.'  The program will predict the most likely cuisine "
                  "style using 5 an ensemble classifier approach.  Additionallly, "
-                 "the indices of the 5 most similar meals will be returned to the "
+                 "the ids of the 5 most similar meals will be returned to the "
                  "user with the option to display the ingredients.  These simlarities "
                  "are computed via a 'Term Frequency - Inverse Document Frequency (tf-idf)' "
                  "approach.  For more technical details, please consult the README"

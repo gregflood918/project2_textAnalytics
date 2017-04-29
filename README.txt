@@ -18,7 +18,7 @@ interface that accepts a list of food ingredients inputted by the
 user then performs two tasks:
 
 1. Predicts the type (style) of cuisine based on the ingredients
-2. Returns the indices of the 'most similar' recpipes to the provided
+2. Returns the ids of the 'most similar' recipes to the provided
 ingredient list.
 
 Both of these tasks will be discussed indivudally in the next section.
@@ -234,13 +234,19 @@ clasifier using the yummly.jsonfile and saves the trained classifier as a
 with the specified name, no classifer will be trained. Otherwise, a new 
 .pickle file will be saved and contain the classifier.  Note that the FULL 
 data set is being used after training, however, training on the first 
-2000 recipes is used to get a sense of predictive performance.
+2000 recipes is used to get a sense of predictive performance.  The 
+predictive performance (accuracy) on the model of the train test set is included
+next to the respective function.
 
-def train_bayes():
-def train_logit():
-def train_multNB():
-def train_sgd():
-def train_linearSVC():
+def train_bayes():  Accuracy - 58.25%
+def train_logit():  Acccuracy - 65.5%
+def train_multNB():  Accuracy - 55.75%
+def train_sgd():  Accuracy - 62%
+def train_linearSVC():  Accuracy - 63.75% 
+
+Considering the number of distinct cuisine types, all the models perform 
+far better than random chance.  We should expect the ensemble of all 5
+models to generalize better than any individual.
 
 These models are not used in the command line interface, but are only 
 included to show how the training of the models was performed.
@@ -261,7 +267,7 @@ select between 3 different options:
 Each option corresponds to a number of function calls.
 Program will run until the user manually enter '0'. If '3' is selected,
 the user will enter ingredients one at a time until they enter '0'.  The
-prediction is returned, along with the indices of the 5 most similar 
+prediction is returned, along with the id's of the 5 most similar 
 ingredients.  The user is then asked whether they want to see the ingredients
 in these 5 recipes.
 
