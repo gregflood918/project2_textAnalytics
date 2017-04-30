@@ -21,6 +21,10 @@ of food classifications and the computation of the most
 similar ingredients.
 """
 
+#Test that the yummly file is present
+def test_hasData():
+    assert os.path.isfile("data/yummly.json")
+
 #Test for naive bayes
 def test_nb():
     assert os.path.isfile("pickles/naive_bayes.pickle")

@@ -84,7 +84,7 @@ def train_bayes():
     trainSet = featureSet[:2000]
     testSet = featureSet[2000:2400]
     classifier = nltk.NaiveBayesClassifier.train(trainSet)
-    print("Train/test accuracy using first 1200 observations: "+
+    print("Train/test accuracy using first 2400 observations: "+
           str(nltk.classify.accuracy(classifier,testSet)) + "\n")
     #Accuracy .5825
     print("Training full dataset . . .")
@@ -329,4 +329,3 @@ def run_option_three(user_recipe):
         else:
             use_input = input("Invalid entry.  Please enter 'y' or 'n': ")
     return 
-

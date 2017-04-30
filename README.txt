@@ -120,20 +120,64 @@ Python 3
 
 Testing:
 
-In total, there are 7 tests.  They test that the the .pickle files
-for the classifier are present and also test that the essential 
-functions of phase2.py can be performed.  Specifically, it tests the 
-predicted cuisine type for a known recipe and also tests that a known
-recipe is computed as being most similar to itself (relative to the
-yummly.json data.)
+In total, there are 12 tests spread between two test files,
+'phase1_test.py' and 'phase2_test.py'
 
 The tests are listed below.  To run, go the project2_textAnalytics
 directory and enter the follwoing command:
 
 python3 setup.py test
 
-This uses the pytest module to run the tests.
+This uses the pytest module to run the tests.  
 
+####################
+
+phase1_test.py
+
+There are 4 tests in this python file.  They check that the desired
+data file is present in the specfied directory.  Also performs the
+functions of phase1.py with a small dataset.  The functions are below
+
+
+def test_hasData():
+Tests that srep dataset is present
+ 
+
+def test_getPaired():
+Test that getPairedIngredients() has worked
+by comparing to a known entry in srep00196 dataset
+
+
+def test_distance():
+Test that distance matrix computes properly.  All diagonals 
+should have a distance of 0 in the distance matrix.  So assert
+that this is the case, and also test that an entry in dist has 
+the expected value.
+    
+
+def test_dimensionReduce():
+Test to test that the dimension reduce function works 
+properly.  This function returns a grouped pandas dataframe
+Test checks that the dataframe is as expected.
+
+
+###################
+
+phase2_test.py
+
+There are 8 tests in phase2_test.py.  The tests check that the .pickle
+files for the classifier are present and also test that the essential 
+functions of phase2.py can be performed.  Specifically, it tests the 
+predicted cuisine type for a known recipe and also tests that a known
+recipe is computed as being most similar to itself (relative to the
+yummly.json data.)
+
+
+def test_hasData():
+Test that the yummly file is present
+
+def test_hasData():
+Test that the yummly file is present
 
 def test_nb():
 Test for naive bayes
@@ -206,6 +250,7 @@ project2_textAnalytics/
            yummly.json
 		srep00196-s2.csv
         tests/
+           phase1_test.py
            phase2_test.py
 
 
